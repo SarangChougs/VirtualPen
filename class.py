@@ -25,7 +25,7 @@ class VirtualPen():
         self.noiseth = 800
         self.frame = None
         self.available = False
-        self.key = cv2.waitKey(1) & 0xFF
+        self.key = None
         self.white = "paint.jpg"
         self.color = red # line color
         self.pointer_color = green
@@ -69,7 +69,7 @@ class VirtualPen():
                     self.drawLine()
                     cv2.imshow("Output", self.output)
                     self.key = cv2.waitKey(1) & 0xFF
-                    if self.key == ord('q'):
+                    if keyboard.is_pressed('q'):
                         break
                 else:
                     if not once:
@@ -77,7 +77,7 @@ class VirtualPen():
                         once = True
                     cv2.imshow("output", self.background_canvas)
                     self.key = cv2.waitKey(1) & 0xFF
-                    if self.key == ord('q'):
+                    if keyboard.is_pressed('q'):
                         break
         if self.available:
             self.video.release()
@@ -130,7 +130,7 @@ class VirtualPen():
     '''
     def captureScreen(self):
         print("[INFO]: Capturing background screen...")
-        print("[INFO]: Press 'n' to capture new background or 'x' to use default or 'b' to use black background")
+        print("[INFO]: Press ('n' to capture new background) ('x' to use default) ('b' to use black background) ('f' to use webcam)")
         name = "background.jpg"
         while True:
             if keyboard.is_pressed('n'):
@@ -144,6 +144,9 @@ class VirtualPen():
             elif keyboard.is_pressed('b'):
                 self.background_canvas_name = "BlackBoard"
                 return("black")
+            elif keyboard.is_pressed('f'):
+                self.background_canvas_name = "Webcam"
+                return("webcam")
             else:
                 pass  
 
@@ -159,6 +162,9 @@ class VirtualPen():
             print("[INFO]: Setting Background as Black...")
             self.background_canvas = np.zeros_like(self.frame)
             self.background_canvas = cv2.resize(self.background_canvas,(self.width,self.height))
+        elif image == "webcam":
+            print("[INFO]: Setting Background as WebCam...")
+            self.background_canvas = self.frame
         else:
             print("[INFO]: New Background image provided...")
             self.background_canvas = cv2.imread(image)
@@ -181,9 +187,13 @@ class VirtualPen():
         # after the points are drawn new points become the previous points
         self.x1, self.y1 = self.x2,self.y2
         
+        # extra line for making background to live feed from webcam
+        if self.background_canvas_name == "Webcam":
+            self.background_canvas = self.frame
+
         # add the 3 canvas into a single canvas
         self.output = cv2.addWeighted(self.pointer_canvas,1,self.paint_canvas,1,0)
-        self.output = cv2.addWeighted(self.background_canvas,0.5,self.output,5,0)
+        self.output = cv2.addWeighted(self.background_canvas,0.5,self.output,1,0)
         
         # info to be printed on the output 
         info1 = [
@@ -196,6 +206,7 @@ class VirtualPen():
         ("Take ss =", "n", cyan),
         ("Default BG =", "x", cyan),
         ("Black BG =", "b", cyan),
+        ("Webcam BG = ", "f", cyan),
         ("----INFO----", "", green),
         ("State =", self.state, red),
         ("BG =", self.background_canvas_name, red)
@@ -207,7 +218,7 @@ class VirtualPen():
             cv2.putText(self.output, text, (10, ((i * 30) + 200)),cv2.FONT_HERSHEY_SIMPLEX, 0.6, c, 2)
 
         # draw on d
-        if self.key == ord('d'):
+        if keyboard.is_pressed('d'):
             self.draw = True
             self.erase = False
             self.color = red
@@ -215,21 +226,21 @@ class VirtualPen():
             self.pointer_size = self.line_size
             self.state = "Draw"
         # pointer on s
-        if self.key == ord('s'):
+        if keyboard.is_pressed('s'):
             self.draw = False
             self.erase = False
             self.state = "Pointer"
             self.pointer_size = 4
         # erase on e
-        if self.key == ord('e'):
+        if keyboard.is_pressed('e'):
             self.color = black
             self.eraser_size = 20
-            self.pointer_size = self.eraser_size
+            self.pointer_size = self.eraser_size - 10
             self.erase = True
             self.draw = False
             self.state = "Eraser"
         # clear on c
-        if self.key == ord('c'):
+        if keyboard.is_pressed('c'):
             self.paint_canvas = None
         
     '''
@@ -243,8 +254,10 @@ class VirtualPen():
         cap = cv2.VideoCapture(0)
         cap.set(3,1280)
         cap.set(4,720)
+        print("[INFO]: Starting Webcam...")
+        time.sleep(2)
         # Create a window named trackbars.
-        cv2.namedWindow("Trackbars")
+        cv2.namedWindow("HSV Finder")
 
         # Now create 6 trackbars that will control the lower and upper range of 
         # H,S and V channels. The Arguments are like this: Name of trackbar, 
@@ -292,20 +305,20 @@ class VirtualPen():
             mask_3 = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
             
             # stack the mask, orginal frame and the filtered result
-            stacked = np.hstack((mask_3,frame,res))
+            stacked = np.hstack((mask_3,res,frame))
             
             # Show this stacked frame at 40% of the size.
             cv2.imshow('Trackbars',cv2.resize(stacked,None,fx=0.4,fy=0.4))
             
             # If the user presses ESC then exit the program
             key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):
+            if keyboard.is_pressed('q'):
                 break
             
             # If the user presses `s` then print this array.
-            if key == ord('s'):
+            if keyboard.is_pressed('s'):
                 theArray = [[l_h,l_s,l_v],[u_h, u_s, u_v]]
-                print(theArray)
+                print("[INFO]: HSV value saved : " + str(theArray))
                 
                 # Also save this array as hsv_value.npy
                 np.save('hsv_value',theArray)
