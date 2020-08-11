@@ -9,8 +9,10 @@ This repository contains the files of virtual pen project using openCV in python
 - keyboard (pip intall keyboard)
 - pillow (pip install pillow)
 
-## To start this program
+## To start this program, type in cmd
 
 python class.py
 
-To use this program, just follow the instructions displayed in command promt.
+## To use this program
+
+Just follow the instructions displayed in command promt.
