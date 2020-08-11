@@ -255,9 +255,8 @@ class VirtualPen():
         cap.set(3,1280)
         cap.set(4,720)
         print("[INFO]: Starting Webcam...")
-        time.sleep(2)
         # Create a window named trackbars.
-        cv2.namedWindow("HSV Finder")
+        cv2.namedWindow("Trackbars")
 
         # Now create 6 trackbars that will control the lower and upper range of 
         # H,S and V channels. The Arguments are like this: Name of trackbar, 

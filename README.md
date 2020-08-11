@@ -2,7 +2,7 @@
 
 This repository contains the files of virtual pen project using openCV in python.
 
-## Libraries need to run this project
+## Libraries needed to run this project
 
 - openCV_python (version 3) (pip install opencv_contrib_python)
 - numpy  (pip instal numpy)
@@ -15,4 +15,4 @@ python class.py
 
 ## To use this program
 
-Just follow the instructions displayed in command promt.
+Just follow the instructions displayed in command promt, or refer the demo video provided with the project.
