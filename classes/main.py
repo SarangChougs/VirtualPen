@@ -14,9 +14,16 @@ class VirtualPen():
     '''
     Constructor
     '''
-    def __init__(self):
+    def __init__(self,res = "default"):
+        self.resolution = res
         self.width = 1280
         self.height = 720
+
+        # change the resolution to default 
+        if self.resolution == "default":
+            self.width = None
+            self.height = None
+            
         self.background_canvas = None
         self.load_disk = True
         self.pointer_canvas = None
@@ -44,8 +51,12 @@ class VirtualPen():
     def startWebCam(self):
         print("[INFO]: Starting Webcam...")
         self.video = cv2.VideoCapture(0)
-        self.video.set(3,self.width)
-        self.video.set(4,self.height)
+        if self.resolution != "default":   
+            self.video.set(3,self.width)
+            self.video.set(4,self.height)
+        else:
+            self.width = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))
+            self.height = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))
         time.sleep(2)
         available, self.frame = self.video.read()
 
@@ -161,7 +172,7 @@ class VirtualPen():
         elif image == "black":
             print("[INFO]: Setting Background as Black...")
             self.background_canvas = np.zeros_like(self.frame)
-            self.background_canvas = cv2.resize(self.background_canvas,(self.width,self.height))
+            # self.background_canvas = cv2.resize(self.background_canvas,(self.width,self.height))
         elif image == "webcam":
             print("[INFO]: Setting Background as WebCam...")
             self.background_canvas = self.frame
