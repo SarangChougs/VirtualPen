@@ -8,22 +8,26 @@ red = [0,0,255]
 green = [0,255,0]
 cyan = [255,255,0]
 black = [0,0,0]
+MAX = 2000
+width = MAX
+height = MAX
 
 class VirtualPen():
 
     '''
     Constructor
     '''
-    def __init__(self,res = "default"):
+    def __init__(self,res = "new"):
         self.resolution = res
-        self.width = 1280
-        self.height = 720
 
         # change the resolution to default 
         if self.resolution == "default":
             self.width = None
             self.height = None
-            
+        else:
+            self.width = width
+            self.height = height
+
         self.background_canvas = None
         self.load_disk = True
         self.pointer_canvas = None
@@ -51,13 +55,17 @@ class VirtualPen():
     def startWebCam(self):
         print("[INFO]: Starting Webcam...")
         self.video = cv2.VideoCapture(0)
+
+        # set resolution to max if default is not set
         if self.resolution != "default":   
             self.video.set(3,self.width)
             self.video.set(4,self.height)
+            self.width = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))
+            self.height = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))
         else:
             self.width = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))
             self.height = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        time.sleep(2)
+
         available, self.frame = self.video.read()
 
     '''
